@@ -108,7 +108,7 @@ const signup = (props) => {
         </div>
 
         <div className='text-center mt-8 text-black'>
-          <p className='text-orange-400 font-bold'>Already Joined?<Link to ='/' className='mt-2  cursor-pointer text-orange-500 w-[38%] p-2 rounded-[2rem]   font-bold hover:underline hover:bg-orange-300/80'>Login</Link></p>
+          <p className='text-orange-400 font-bold'>Already Joined?<Link to ='/MyMaps' className='mt-2  cursor-pointer text-orange-500 w-[38%] p-2 rounded-[2rem]   font-bold hover:underline hover:bg-orange-300/80'>Login</Link></p>
       </div>
 
       </div>
