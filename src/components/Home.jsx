@@ -87,7 +87,7 @@ const Home = (props) => {
         </div>
 
         <div className='text-center mt-8 text-black'>
-          <p className='text-orange-400 font-bold'>New to MyCollegeMaps? <Link to ='/signup' className='mt-2  cursor-pointer text-orange-500 w-[38%] p-2 rounded-[2rem]   font-bold hover:underline hover:bg-orange-300/80'>Join Now</Link></p>
+          <p className='text-orange-400 font-bold'>New to MyCollegeMaps? <Link to ='MyMaps/signup' className='mt-2  cursor-pointer text-orange-500 w-[38%] p-2 rounded-[2rem]   font-bold hover:underline hover:bg-orange-300/80'>Join Now</Link></p>
       </div>
 
       </div>
