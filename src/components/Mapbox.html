@@ -1,0 +1,148 @@
+<html>
+    <head>
+        <title>My Mapbox Webmap</title>
+        <meta name="viewport" content="intial-scale=1,maximum-scale=1,user-scalable=no">
+        <script src='https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js'></script>
+        <link href='https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css' rel='stylesheet' />
+        <style>
+            body { margin: 0; padding: 0; }
+            #map { position: absolute; top: 0; bottom: 0; width: 100% }
+        </style>
+    </head>
+    <body>
+        <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.js"></script>
+        <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css" type="text/css">
+        <div id="map"></div>
+        <script>
+            mapboxgl.accessToken = 'pk.eyJ1Ijoic2t5bGFyLTAwNzEiLCJhIjoiY2x2bGtxOWJqMmN3ZzJtbDlvbDZia2R1YyJ9.HnrQGtU8_8U7l--OYXeksQ';
+            const map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/mapbox/streets-v12',
+                center: [75.56491,26.84303],
+                zoom: 16
+            }); 
+            
+            map.addControl(new mapboxgl.FullscreenControl(), 'top-right'); 
+            map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+            map.addControl(
+                new MapboxDirections({
+                    accessToken: mapboxgl.accessToken
+                }), 'top-left'
+            );
+
+            var bounds = [
+                [75.56192947806983, 26.838110924618533], // Southwest coordinates
+                [75.56608035861046, 26.84799717164451 ]  // Northeast coordinates
+            ];
+
+            map.setMaxBounds(bounds);
+
+            var geolocate = new mapboxgl.GeolocateControl({
+                positionOptions: {
+                   enableHighAccuracy: true
+                },
+                trackUserLocation: true
+            });
+
+            map.addControl(geolocate);
+
+            geolocate.on('geolocate', function(event) {
+               var userLocation = event.coords; // User's coordinates
+               map.setCenter([userLocation.longitude, userLocation.latitude]);
+            });
+
+            map.addControl(geolocate);
+
+            var userLocationLayer = {
+                id: 'user-location',
+                type: 'circle',
+                source: {
+                    type: 'geojson',
+                    data: {
+                        type: 'Feature',
+                        properties: {},
+                        geometry: {
+                            type: 'Point',
+                            coordinates: []
+                        }
+                    }
+                },
+                paint: {
+                    'circle-radius': 8,
+                    'circle-color': '#007cbf'
+                }
+            };
+
+            map.on('load', function () {
+                map.addLayer(userLocationLayer);
+
+                geolocate.on('geolocate', function(event) {
+                    var userLocation = event.coords;
+                    var coordinates = [userLocation.longitude, userLocation.latitude];
+
+                    // Update user's location on the map
+                    map.getSource('user-location').setData({
+                        type: 'Feature',
+                        properties: {},
+                        geometry: {
+                            type: 'Point',
+                            coordinates: coordinates
+                        }
+                    });
+
+                    updateRoute(coordinates);
+                });
+
+                map.on('click', function(event) {
+                    var destinationCoordinates = [event.lngLat.lng, event.lngLat.lat];
+                    updateRoute(destinationCoordinates);
+                });
+            });
+
+            function updateRoute(destinationCoordinates) {
+                var userLocation = map.getSource('user-location')._data.geometry.coordinates;
+        
+                var endpoint = 'https://api.mapbox.com/directions/v5/mapbox/driving/' +
+                    userLocation[0] + ',' + userLocation[1] +
+                    ';' + destinationCoordinates[0] + ',' + destinationCoordinates[1] +
+                    '?steps=true&geometries=geojson&access_token=' + mapboxgl.accessToken;
+
+                fetch(endpoint)
+                    .then(response => response.json())
+                    .then(data => {
+                        var route = data.routes[0].geometry;
+                        if (!map.getSource('route')) {
+                            map.addSource('route', {
+                                type: 'geojson',
+                                data: {
+                                    type: 'Feature',
+                                    geometry: route
+                                }
+                            });
+
+                            map.addLayer({
+                                id: 'route',
+                                type: 'line',
+                                source: 'route',
+                                layout: {
+                                    'line-join': 'round',
+                                    'line-cap': 'round'
+                                },
+                                paint: {
+                                    'line-color': '#3887be',
+                                    'line-width': 5
+                                }
+                            });
+                        } else {
+                            map.getSource('route').setData({
+                                type: 'Feature',
+                                geometry: route
+                            });
+                        }
+                    });
+            }
+
+        </script>
+    </body>
+</html>
