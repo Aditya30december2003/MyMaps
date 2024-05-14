@@ -18,7 +18,6 @@ export default defineConfig(({ mode }) => {
     define: {
       'process.env.SOME_KEY': JSON.stringify(env.SOME_KEY)
     },
-    base: "/MyMaps/",
     plugins: [react()],
   }
 })
